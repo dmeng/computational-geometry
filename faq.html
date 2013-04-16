@@ -2,18 +2,24 @@
 <html>
 <head>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-        <title>Axis-Aligned Art Gallery - 15-456 Computational Geometry (Spring 2013)</title>
+        <title>Rectilinear Art Gallery - 15-456 Computational Geometry (Spring 2013)</title>
 </head>
 
 <body>
-    <h1>What is the Axis-Aligned Art Gallery problem?</h1>
+    <h1>What is the Rectilinear Art Gallery problem?</h1>
 
     <p>First, let's define the Art Gallery problem. </p>
 
-    <p>Given a polygon P, we want to find a set S such that for every point p in the polygon, there exists a q in S such that the line segment between p and q lies entirely in the polygon. The interesting part is the question of how large must such a set S be. Chvatal proved in 1973 that n/3 points is always sufficient for a polygon with n points. </p>
+    <p>Given a polygon P, we want to find a set S such that for every point p in the polygon, there exists a q in S such that the line segment between p and q lies entirely in the polygon.
+       The interesting part is the question of how large must such a set S be. Chvatal proved in 1973 that n/3 points is always sufficient for a polygon with n points. </p>
 
-    <p>For the "Axis-Aligned" version of the problem, we will restrict the set of polygons we are looking at to the set of polygons whose edges are parallel to the x- and y- axes.</p>
+    <p>For the "rectilinear" version of the problem, we will restrict the set of polygons we are looking at to the set of polygons whose edges are all horizontal or vertical.
+       This itself spawns other variants that we may discuss here. </p>
 
+    <!--
+        Variants include the Polyomino Art Gallery problem, where each polygon is now a polyomino (possibly with holes). Well known examples of polyominoes 
+        include dominoes, tetrominoes (the Tetris pieces), and pentominoes.
+    -->
 
 </body>
 
