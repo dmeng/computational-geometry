@@ -297,7 +297,7 @@ function findPathGuards() {
     var startSegment = i+1; // add one to skip over endpoint (edge case)
     var startCorners = findNextCorner(startSegment);
     var endCorners = findNextBridge(startCorners, 3);
-    i = findNextCorner(endCorners);
+    i = findNextCorner(endCorners) + 1;
     console.log(startSegment + " " + startCorners + " " + endCorners + " " + i);
     // edge case: no corners left
     if (startCorners == path.length) {
