@@ -1,40 +1,61 @@
 const WIDTH = 500;
 const HEIGHT = 500;
+const DX = [-1,0,1,0];
+const DY = [0,-1,0,1];
 
 canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var numRows = 5;
-var numCols = 5;
+var numRows = 0;
+var numCols = 0;
 var tileSize, left, up;
 
-var grid = [[false, false, true, true, true],
-            [true, true, true, false, true],
-            [false, false, false, false, true],
-            [false, false, false, true, true],
-            [true, true, true, true, false]];
+//var grid = [[false, false, true, true, true],
+//            [true, true, true, false, true],
+//            [false, false, false, false, true],
+//            [false, false, false, true, true],
+//            [true, true, true, true, false]];
+var grid = [];
+var available = {};
+var pStart = undefined;
+var pEnd = undefined;
 
 var path = [];   // an array of [row,col] tuples
-var guards = []; // an array of [row,col,corner] tuples
+var guards = []; // an array of [row,col,cornRow,cornCol] tuples
 
 /*******************************************************
  * Helpers
  ******************************************************/
 
-// calculates the degree of a vertex in the grid
-function degree(row, col) {
-  // don't want to find the degree of a non-vertex
-  if (!grid[row][col]) {
-    return -1;
+function getNeighbors(row, col) {
+  if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) {
+    return [];
   }
-  var deg = -1;
-  for (var r = Math.max(0, row - 1); r < Math.min(numRows, row + 2); r++) {
-    for (var c = Math.max(0, col - 1); c < Math.min(numCols, col + 2); c++) {
-      if (grid[r][c]) {
-        deg++;
-      }
+  var neighbors = [];
+  for (var i = 0; i < DX.length; i++) {
+    var r = row + DX[i];
+    var c = col + DY[i];
+    if (r >= 0 && r < grid.length &&
+        c >= 0 && c < grid[0].length &&
+        grid[r][c]) {
+      neighbors.push([r, c]);
     }
   }
-  return deg;
+  return neighbors;
+}
+
+// calculates the degree of a vertex in the grid
+// if allowEmpty == true, then don't worry if cell is empty
+function degree(row, col, allowEmpty) {
+  // don't want to find the degree of a non-vertex
+  if (!allowEmpty && !grid[row][col]) {
+    return -1;
+  }
+  return getNeighbors(row, col).length;
+}
+
+// manhattan distance
+function dist(r1, c1, r2, c2) {
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2);
 }
 
 // find a degree one vertex
@@ -49,6 +70,127 @@ function findEndpoint() {
     }
   }
 }
+
+/*******************************************************
+ * I/O
+ ******************************************************/
+
+// Checks if a cell can be added to the available set
+function isValidNew(row, col) {
+  if (row < 0 || row >= grid.length ||
+      col < 0 || col >= grid[0].length ||
+      grid[row][col]) {
+    return false;
+  }
+  var deg = degree(row, col, true);
+  return deg == 1;
+}
+
+// checks to see if cell is currently available
+function isAvailable(row, col) {
+  // nothing's on the grid yet
+  if (pStart == undefined) { // && pEnd == undefined)
+    return true;
+  }
+  return (row + "," + col) in available;
+}
+
+// checks to see if cell is currently an endpoint
+function isEndpoint(row, col) {
+  return pStart != undefined && pStart[0] == row && pStart[1] == col ||
+         pEnd != undefined && pEnd[0] == row && pEnd[1] == col;
+}
+
+// set new available points
+function resetAvailable() {
+  available = {};
+  guards = [];
+  for (var i = 0; i < DX.length; i++) {
+    var r1 = pStart[0] + DX[i];
+    var c1 = pStart[1] + DY[i];
+    var r2 = pEnd[0] + DX[i];
+    var c2 = pEnd[1] + DY[i];
+    if (isValidNew(r1,c1)) {
+      available[r1 + "," + c1] = true;
+    }
+    if (isValidNew(r2,c2)) {
+      available[r2 + "," + c2] = true;
+    }
+  }
+}
+
+// adds an available cell
+function addAvailable(row, col) {
+  // set new endpoints
+  if (pStart == undefined) {
+    pStart = [row, col];
+    pEnd = [row, col];
+  } else if (dist(row, col, pStart[0], pStart[1]) == 1) {
+    pStart[0] = row;
+    pStart[1] = col;
+  } else {
+    pEnd[0] = row;
+    pEnd[1] = col;
+  }
+  grid[row][col] = true;
+  resetAvailable();
+}
+
+function removeEndpoint(row, col) {
+  grid[row][col] = false;
+  var neighbors = getNeighbors(row, col);
+  if (neighbors.length == 0) {
+    // no more cells are highlighted
+    pStart = undefined;
+    pEnd = undefined;
+  } else { // neighbors.length == 1
+    // update endpoints
+    var newEndpoint = neighbors[0];
+    if (pStart[0] == row && pStart[1] == col) {
+      pStart = newEndpoint;
+    } else {
+      pEnd = newEndpoint;
+    }
+    resetAvailable();
+    console.log(pStart + "," + pEnd);
+  }
+}
+
+/*******************************************************
+ * Events
+ ******************************************************/
+
+function onMouseMove(event) {
+  var row = parseInt((event.pageY - canvas.offsetTop) / tileSize);
+  var col = parseInt((event.pageX - canvas.offsetLeft) / tileSize);
+  if (isAvailable(row, col)) {
+    drawGrid(row, col, "green");
+  } else if (isEndpoint(row, col)) {
+    drawGrid(row, col, "red");
+  } else {
+    drawGrid();
+  }
+}
+
+function onMouseDown(event) {
+  var row = parseInt((event.pageY - canvas.offsetTop) / tileSize);
+  var col = parseInt((event.pageX - canvas.offsetLeft) / tileSize);
+  if (isAvailable(row, col)) {
+    addAvailable(row, col);
+    drawGrid();
+  } else if (isEndpoint(row, col)) {
+    removeEndpoint(row, col);
+    drawGrid();
+  }
+}
+
+function onMouseOut(event) {
+  drawGrid();
+}
+
+canvas.addEventListener('mousemove', onMouseMove, false);
+canvas.addEventListener('mousedown', onMouseDown, false);
+canvas.addEventListener('mouseout', onMouseOut, false);
 
 /*******************************************************
  * Path Algo
@@ -154,11 +296,17 @@ function findPathGuards() {
   }
 }
 
+function run() {
+  calcPath();
+  findPathGuards();
+  drawGrid();
+}
+
 /*******************************************************
  * Drawing
  ******************************************************/
 
-function drawGrid() {
+function drawGrid(hoverRow, hoverCol, hoverColor) {
   ctx.lineWidth = 3;
   ctx.strokeStyle = "lightgray";
   // draws the grid
@@ -174,6 +322,14 @@ function drawGrid() {
       ctx.fillRect(cellLeft, cellUp, tileSize, tileSize);
       ctx.strokeRect(cellLeft, cellUp, tileSize, tileSize);
     }
+  }
+  // draw hover
+  if (hoverRow != undefined && hoverCol != undefined && hoverColor != undefined) {
+    ctx.fillStyle = hoverColor;
+    ctx.fillRect(left + hoverCol * tileSize, up + hoverRow * tileSize,
+        tileSize, tileSize);
+    ctx.strokeRect(left + hoverCol * tileSize, up + hoverRow * tileSize,
+        tileSize, tileSize);
   }
   // draws the guards
   for (var i = 0; i < guards.length; i++) {
@@ -195,20 +351,28 @@ function drawGrid() {
 }
 
 /*******************************************************
- * I/O
- ******************************************************/
-
-function updateSize() {
-  tileSize = Math.min(WIDTH / numCols, HEIGHT / numRows);
-  left = (WIDTH - numCols * tileSize) / 2;
-  up = (HEIGHT - numRows * tileSize) / 2;
-}
-
-/*******************************************************
  * INIT
  ******************************************************/
 
-updateSize();
-calcPath();
-findPathGuards();
-drawGrid();
+function init(rows, cols) {
+  if (rows != undefined && cols != undefined) {
+    numRows = rows;
+    numCols = cols;
+  }
+  tileSize = Math.min(WIDTH / numCols, HEIGHT / numRows);
+  left = (WIDTH - numCols * tileSize) / 2;
+  up = (HEIGHT - numRows * tileSize) / 2;
+  grid = [];
+  for (var i = 0; i < numRows; i++) {
+    grid.push([]);
+    for (var j = 0; j < numCols; j++) {
+      grid[i].push(false);
+    }
+  }
+  available = {};
+  guards = [];
+  pStart = undefined;
+  pEnd = undefined;
+  drawGrid();
+}
+init(5, 5);

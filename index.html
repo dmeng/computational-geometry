@@ -23,6 +23,15 @@
     Your browser is foobar.
     </canvas>
 
+    Size:
+    <input type="text" id="size" onkeydown="if (event.keyCode == 13) {
+      var size = parseInt($('#size').val());
+      init(size, size);
+      return false;
+    };">
+    <button type="button" onclick="init()">Clear!</button>
+    <button type="button" onclick="run()">Run!</button>
+
     <script type="text/javascript" src="thin.js"></script>
 
 </body>
