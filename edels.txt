@@ -39,3 +39,58 @@ For each piece, sort the set of reflex vertices in order of x
 coordinate. Place a guard at each one in an odd index. (index from
 1)
 
+/***************************************************************************/
+
+// vertices is a list of points in CCW order
+vertices := input read in from user
+counter := 0
+dent_location := null
+
+for each vertex in vertices:
+    use predecessor and successor to compute internal angle
+    mark as REFLEX and increment counter if angle is 270
+    mark as CONVEX otherwise and set dent_location to it
+
+if counter is even
+    sort by x coordinate and find closest x-coordinate to dent_location.x
+    via binary search and set delta_x to be dent_location minus this value.
+    do the same for y values.
+    remove dent_location and back in
+        (x - delta_x*sign(x - pred.x), y - delta_y*sign(y - pred.x))
+        (x - delta_x*sign(succ.x - x), y - delta_y*sign(succ.y - y))
+        (x - delta_x*(sign(x - pred.x) + sign(succ.x - x)),
+         y - delta_y*(sign(y - pred.y) + sign(succ.y - y)))
+
+        in that order going CCW.
+
+sweepline to find the cuts:
+    sort by decreasing y coordinate
+    have an internal tree keeping vertical lines sorted by x coordinate
+        every time we hit a reflex vertex
+        if there are two reflex vertices at that coordinate,
+            split the polygon into two pieces with that edge and recurse    
+        else
+            find the edges on its left and right
+            figure out which one to pick
+                if successor is above me, pick left
+                if successor is below me, pick right
+                if successor is to my left, pick right
+                if successor is to my right, pick left
+            insert a "fake" vertex at the other end and doubly link the two
+
+Now, compute the parity of the cuts. To do this, we have the following:
+Start at some vertex, init a counter to 0.
+While traversing in CCW order...
+    If the vertex is fake, label it with the counter value
+    If the vertex is reflex, increment the counter and then label it
+
+Now, for each cut, if we encountered the reflex vertex first, the
+"parity" is the parity of the difference of the labels. Otherwise,
+it's the *opposite* parity
+
+Now, cut the polygon along the "odd" horizonal cuts.
+
+For each piece, sort the set of reflex vertices in order of x
+coordinate. Place a guard at each one in an odd index. (index from
+1)
+
