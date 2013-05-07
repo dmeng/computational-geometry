@@ -7,11 +7,11 @@ var numRows = 5;
 var numCols = 5;
 var tileSize, left, up;
 
-var grid = [[true, false, true, true, true],
-            [true, false, true, false, true],
-            [true, false, true, false, true],
-            [true, false, false, false, true],
-            [true, true, true, true, true]];
+var grid = [[false, false, true, true, true],
+            [true, true, true, false, true],
+            [false, false, false, false, true],
+            [false, false, false, true, true],
+            [true, true, true, true, false]];
 
 var path = [];   // an array of [row,col] tuples
 var guards = []; // an array of [row,col,corner] tuples
@@ -118,6 +118,22 @@ function findNextBridge(start, limit) {
   return i;
 }
 
+// finds the corner of the pixel that the guard will be in
+function getVertex(start) {
+  if (start == 0 || start == path.length - 1) {
+    return [0,0];
+  }
+
+  //var row = path[start][0];
+  //var col = path[start][1];
+  var prevRow = path[start-1][0];
+  var prevCol = path[start-1][1];
+  var nextRow = path[start+1][0];
+  var nextCol = path[start+1][1];
+
+  return [nextRow - prevRow, nextCol - prevCol];
+}
+
 // overarching algorithm
 function findPathGuards() {
   var i = 0;
@@ -132,7 +148,9 @@ function findPathGuards() {
     if (startCorners == path.length) {
       startCorners--;
     }
-    guards.push([path[startCorners][0], path[startCorners][1]]);
+    var vertex = getVertex(startCorners);
+    guards.push([path[startCorners][0], path[startCorners][1],
+        vertex[0], vertex[1]]);
   }
 }
 
@@ -158,13 +176,21 @@ function drawGrid() {
     }
   }
   // draws the guards
-  ctx.fillStyle = "green";
   for (var i = 0; i < guards.length; i++) {
     console.log("guard: " + guards[i][0] + " " + guards[i][1]);
     var cellLeft = left + guards[i][1] * tileSize;
     var cellUp = up + guards[i][0] * tileSize;
+    ctx.fillStyle = "green";
     ctx.fillRect(cellLeft, cellUp, tileSize, tileSize);
     ctx.strokeRect(cellLeft, cellUp, tileSize, tileSize);
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    console.log("vertex: " + guards[i][3] + "," + guards[i][2]);
+    ctx.arc(cellLeft + tileSize * (1 + guards[i][3]) / 2,
+            cellUp + tileSize * (1 + guards[i][2]) / 2,
+            tileSize / 8, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
   }
 }
 
