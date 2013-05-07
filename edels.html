@@ -9,6 +9,14 @@
 <body>
     <h1>Rectilinear Art Gallery</h1>
 
+    <ul>
+        <li><a href="faq.html">What is the Rectilinear Art Gallery problem?</a></li>
+        <li><a href="about.html">About the Authors</a></li>
+        <li>Edelsbrunner et al.'s approximation algorithm</li>
+        <li><a href="references.html">References</a></li>
+        <li><a href="index.html">Home</a></li>
+    </ul>
+
     <p>Below is a nice Javascript implementation of Edelsbrunner et al.'s algorithm to find n/4 guards in O(n log n) time.
     </p>
 
@@ -20,27 +28,11 @@
     </br>
     Please input the points in counterclockwise order.
 
-<!--
-    Size:
-    <input type="text" id="size" onkeydown="if (event.keyCode == 13) {
-      var size = parseInt($('#size').val());
-      init(size, size);
-      return false;
-    };">
-    <button type="button" onclick="init()">Clear!</button>
-    <button type="button" onclick="run()">Run!</button>
--->
+    <button type="button" onclick="init()">Reset!</button>
+    <button type="button" onclick="showNodes = !showNodes; draw()">Toggle Vertices!</button>
 
     <script type="text/javascript" src="linkedlist.js"></script>
     <script type="text/javascript" src="edels.js"></script>
-
-    <ul>
-        <li><a href="faq.html">What is the Rectilinear Art Gallery problem?</a></li>
-        <li><a href="about.html">About the Authors</a></li>
-        <li>Edelsbrunner et al.'s approximation algorithm</li>
-        <li><a href="references.html">References</a></li>
-        <li><a href="index.html">Home</a></li>
-    </ul>
 
 </body>
 

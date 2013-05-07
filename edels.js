@@ -11,7 +11,6 @@ var ctx = canvas.getContext("2d");
 var coords = [];
 var loop = null;
 var sortedX = [];
-//var sortedY = [];
 var numReflex = 0;
 var guards = [];
 
@@ -19,6 +18,7 @@ var mouseX = -20;
 var mouseY = -20;
 
 var prep = true;
+var showNodes = false;
 
 /*******************************************************
  * Structure
@@ -222,7 +222,9 @@ function draw() {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    drawNodes();
+    if (showNodes) {
+      drawNodes();
+    }
     drawGuards();
   }
 }
@@ -239,7 +241,6 @@ function initList() {
     node = new LinkedList.Node(newPoint(coords[i][0], coords[i][1]));
     loop.append(node);
     sortedX.push(node);
-    //sortedY.push(node);
   }
   var node = loop.first;
   numReflex = 0;
@@ -268,12 +269,10 @@ function chipConvex() {
           newPoint(node.data.x + dx1, node.data.y + dy1, CONVEX));
       loop.insertBefore(node, newNode);
       sortedX.push(newNode);
-      //sortedY.push(newNode);
       newNode = new LinkedList.Node(
           newPoint(node.data.x + dx2, node.data.y + dy2, CONVEX));
       loop.insertAfter(node, newNode);
       sortedX.push(newNode);
-      //sortedY.push(newNode);
       node.data.x += dx1 + dx2;
       node.data.y += dy1 + dy2;
       node.data.type = REFLEX;
@@ -291,12 +290,6 @@ function sortData() {
     }
     return n1.data.x - n2.data.x;
   });
-  //sortedY.sort(function(n1, n2) {
-  //  if (n1.data.y == n2.data.y) {
-  //    return n1.data.x - n2.data.x;
-  //  }
-  //  return n1.data.y - n2.data.y;
-  //});
 }
 
 function successfulInsert(node, idx) {
@@ -392,10 +385,10 @@ function loopCut(node) {
       lNode = lNode.data.pair;
       canPairCross = false;
     } else {
-      canPairCross = true;
-      if (lNode.data.type == REFLEX) {
+      if (canPairCross && lNode.data.type == REFLEX) {
         sorted.push(lNode);
       }
+      canPairCross = true;
       lNode = lNode.next;
     }
   } while (lNode != node);
@@ -436,6 +429,21 @@ function run() {
   createArtificial();
   computeParity();
   findGuards();
+}
+
+function init() {
+  coords = [];
+  loop = null;
+  sortedX = [];
+  numReflex = 0;
+  guards = [];
+  
+  mouseX = -20;
+  mouseY = -20;
+  
+  prep = true;
+  showNodes = false;
+  draw();
 }
 
 draw();
