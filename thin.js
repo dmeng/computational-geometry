@@ -22,6 +22,11 @@ var pEnd = undefined;
 var path = [];   // an array of [row,col] tuples
 var guards = []; // an array of [row,col,cornRow,cornCol] tuples
 
+const HOVER = 0;
+const ADD = 1;
+const REMOVE = 2;
+var mouseType = 0;
+
 /*******************************************************
  * Helpers
  ******************************************************/
@@ -163,11 +168,19 @@ function removeEndpoint(row, col) {
 function onMouseMove(event) {
   var row = parseInt((event.pageY - canvas.offsetTop) / tileSize);
   var col = parseInt((event.pageX - canvas.offsetLeft) / tileSize);
-  if (isAvailable(row, col)) {
-    drawGrid(row, col, "green");
-  } else if (isEndpoint(row, col)) {
-    drawGrid(row, col, "red");
-  } else {
+  if (mouseType == HOVER) {
+    if (isAvailable(row, col)) {
+      drawGrid(row, col, "green");
+    } else if (isEndpoint(row, col)) {
+      drawGrid(row, col, "red");
+    } else {
+      drawGrid();
+    }
+  } else if (mouseType == ADD && isAvailable(row, col)) {
+      addAvailable(row, col);
+      drawGrid();
+  } else if (mouseType == REMOVE && isEndpoint(row, col)) {
+    removeEndpoint(row, col);
     drawGrid();
   }
 }
@@ -176,12 +189,16 @@ function onMouseDown(event) {
   var row = parseInt((event.pageY - canvas.offsetTop) / tileSize);
   var col = parseInt((event.pageX - canvas.offsetLeft) / tileSize);
   if (isAvailable(row, col)) {
-    addAvailable(row, col);
-    drawGrid();
+    mouseType = ADD;
   } else if (isEndpoint(row, col)) {
-    removeEndpoint(row, col);
-    drawGrid();
+    mouseType = REMOVE;
   }
+  onMouseMove(event);
+}
+
+function onMouseUp(event) {
+  mouseType = HOVER;
+  drawGrid();
 }
 
 function onMouseOut(event) {
@@ -190,6 +207,7 @@ function onMouseOut(event) {
 
 canvas.addEventListener('mousemove', onMouseMove, false);
 canvas.addEventListener('mousedown', onMouseDown, false);
+canvas.addEventListener('mouseup', onMouseUp, false);
 canvas.addEventListener('mouseout', onMouseOut, false);
 
 /*******************************************************
