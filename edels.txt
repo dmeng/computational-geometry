@@ -1,0 +1,41 @@
+Pseudocode for Edelsbrunner's algorithm
+
+For each vertex, label it as
+    REFLEX if its internal angle is 270 degrees
+    CONVEX otherwise
+
+Compute the total number of reflex vertices
+If the number if even do the following:
+    Find some convex vertex, say at (x,y)
+    delta_x := difference between x and next closest x coordinate
+    delta_y := difference between y and next closest y coordinate
+    Remove (x,y) and add in
+    (x +- delta_x, y)
+    (x, y +- delta_y)
+    (x +- delta_x, y +- delta_y)
+
+    where the +/- is chosen to make the last inserted point interior
+    (worst case is to just break it down into the 4 cases)
+
+Using each reflex vertex, compute a "horizonal cut". If the other side
+of the cut is another vertex, then split the polygon into two pieces
+along this cut, and recursively solve each piece.
+Otherwise, insert a new "fake" vertex into our datastructure for the
+destination vertex of our cut.
+
+Now, compute the parity of the cuts. To do this, we have the following:
+Start at some vertex, init a counter to 0.
+While traversing in CCW order...
+    If the vertex is fake, label it with the counter value
+    If the vertex is reflex, increment the counter and then label it
+
+Now, for each cut, if we encountered the reflex vertex first, the
+"parity" is the parity of the difference of the labels. Otherwise,
+it's the *opposite* parity
+
+Now, cut the polygon along the "odd" horizonal cuts.
+
+For each piece, sort the set of reflex vertices in order of x
+coordinate. Place a guard at each one in an odd index. (index from
+1)
+
