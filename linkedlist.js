@@ -71,7 +71,7 @@ LinkedList.Circular.prototype.reverse = function() {
     node.next = node.prev;
     node.prev = newNode;
     node = newNode;
-  } while (node != this.last);
+  } while (node != this.first);
   this.first = this.last;
   this.last = this.first.prev;
 };

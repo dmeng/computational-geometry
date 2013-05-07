@@ -234,6 +234,18 @@ function draw() {
  * ALGO
  ******************************************************/
 
+function fixOrientation() {
+  var node = loop.first;
+  var area = 0;
+  do {
+    area += (node.next.data.x - node.data.x) * (node.next.data.y + node.data.y);
+    node = node.next;
+  } while (node != loop.first);
+  if (area < 0) {
+    loop.reverse();
+  }
+}
+
 function initList() {
   loop = new LinkedList.Circular();
   var node = null;
@@ -242,6 +254,7 @@ function initList() {
     loop.append(node);
     sortedX.push(node);
   }
+  fixOrientation();
   var node = loop.first;
   numReflex = 0;
   do {
