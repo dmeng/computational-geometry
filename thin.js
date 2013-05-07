@@ -9,11 +9,6 @@ var numRows = 0;
 var numCols = 0;
 var tileSize, left, up;
 
-//var grid = [[false, false, true, true, true],
-//            [true, true, true, false, true],
-//            [false, false, false, false, true],
-//            [false, false, false, true, true],
-//            [true, true, true, true, false]];
 var grid = [];
 var available = {};
 var pStart = undefined;
